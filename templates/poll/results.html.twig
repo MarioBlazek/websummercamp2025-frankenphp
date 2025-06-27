@@ -1,0 +1,95 @@
+{# templates/poll/results_all.html.twig #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Poll Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9fafb;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 15px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+        .poll {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .poll h3 {
+            margin-bottom: 20px;
+            color: #34495e;
+            font-weight: 600;
+            font-size: 1.3rem;
+        }
+        ul.options-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        ul.options-list li {
+            background: #eaf2f8;
+            border-radius: 6px;
+            padding: 12px 18px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        ul.options-list li .votes {
+            background-color: #3498db;
+            color: white;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            min-width: 40px;
+            text-align: center;
+        }
+        a.back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: color 0.25s ease;
+        }
+        a.back-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<h1>Poll Results</h1>
+
+{% for poll in polls %}
+    <div class="poll">
+        <h3>{{ poll.question }}</h3>
+        <ul class="options-list">
+            {% for option in poll.options %}
+                <li>
+                    {{ option.text }}
+                    <span class="votes">{{ option.votes }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endfor %}
+
+<a href="{{ path('polls_index') }}" class="back-link">← Back to Polls</a>
+</body>
+</html>

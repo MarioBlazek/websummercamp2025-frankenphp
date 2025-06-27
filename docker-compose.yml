@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+    app:
+        build:
+            context: .
+        container_name: symfony_app
+        ports:
+            - "8010:8000"
+        volumes:
+            - .:/app
+        depends_on:
+            - db
+        environment:
+            DATABASE_URL: "mysql://app:password@db:3306/app?serverVersion=8.0&charset=utf8mb4"
+        command: php -S 0.0.0.0:8000 -t public
+
+    db:
+        image: mysql:8.0
+        container_name: mysql_db
+        ports:
+            - "3307:3306"
+        environment:
+            MYSQL_DATABASE: app
+            MYSQL_USER: app
+            MYSQL_PASSWORD: password
+            MYSQL_ROOT_PASSWORD: root
+        volumes:
+            - mysqldata:/var/lib/mysql
+
+volumes:
+    mysqldata:

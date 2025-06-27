@@ -1,0 +1,165 @@
+{# templates/poll/index.html.twig #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Polls</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9fafb;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 15px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        form {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 6px;
+            box-sizing: border-box;
+        }
+        .poll {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+        .poll h3 {
+            margin-bottom: 10px;
+            color: #34495e;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            font-size: 1rem;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            transition: background-color 0.25s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+<h1>Dead Poll</h1>
+
+<form id="pollForm" novalidate>
+    <label for="userName">Your Name
+        <input type="text" id="userName" name="userName" placeholder="Enter your name" required />
+    </label>
+
+    <div id="pollsContainer">
+        {% for poll in polls %}
+            <div class="poll">
+                <h3>{{ poll.question }}</h3>
+                {% for option in poll.options %}
+                    <label>
+                        <input type="radio" name="poll_{{ poll.id }}" value="{{ option.id }}" required />
+                        {{ option.text }}
+                    </label>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="submit">Submit Answer</button>
+    <div id="message" class="message"></div>
+</form>
+
+<script>
+    const form = document.getElementById('pollForm');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        messageDiv.style.display = 'none';
+        messageDiv.textContent = '';
+        messageDiv.className = 'message';
+
+        const userName = form.userName.value.trim();
+        if (!userName) {
+            showMessage('Please enter your name.', 'error');
+            return;
+        }
+
+        const pollBlocks = form.querySelectorAll('.poll');
+        const selectedInputs = form.querySelectorAll('input[type=radio]:checked');
+
+        if (selectedInputs.length !== pollBlocks.length) {
+            showMessage('Please answer all polls before submitting.', 'error');
+            return;
+        }
+
+        const optionIds = [...selectedInputs].map(input => parseInt(input.value));
+
+        try {
+            const response = await fetch('/poll/answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userName, optionIds }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showMessage('Thanks for your answers!', 'success');
+                form.reset();
+                // Redirect to results page for all polls
+                window.location.href = '/poll/results';
+            } else {
+                showMessage(result.errors || 'An error occurred, please try again.', 'error');
+            }
+        } catch (err) {
+            showMessage('Failed to send your answers. Check your connection.', 'error');
+        }
+    });
+
+    function showMessage(msg, type) {
+        messageDiv.textContent = msg;
+        messageDiv.className = 'message ' + type;
+        messageDiv.style.display = 'block';
+    }
+</script>
+</body>
+</html>
