@@ -2,7 +2,7 @@
 
 # Install PHP and JS dependencies
 install:
-	docker compose exec php composer install
+	docker compose exec app composer install
 
 build:
 	docker compose build
@@ -30,3 +30,10 @@ clear:
 bash:
 	docker compose exec app bash
 
+db:
+	docker compose exec app php bin/console doctrine:database:create --if-not-exists
+	docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
+	docker compose exec app php bin/console app:init-polls
+
+consume:
+	php bin/console messenger:consume async
