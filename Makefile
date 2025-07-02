@@ -40,3 +40,6 @@ db:
 
 consume:
 	docker compose exec app "php bin/console messenger:consume async"
+
+logs-consumer:
+	docker logs franken_app_worker

@@ -13,28 +13,25 @@ services:
     app:
         container_name: "franken_app"
         build:
-            context: ./setup/php-fpm
-            dockerfile: ./Dockerfile
-            args:
-                OS_TYPE: ${DOCKER_HOST_OS:-NonLinux}
-                www_data_uid: ${DOCKER_UID:-1000}
-                www_data_gid: ${DOCKER_GID:-1000}
+            context: .
+            dockerfile: setup/php-fpm/Dockerfile
         volumes:
             - '.:/var/www/franken/'
         ports:
             - '8081:9000'
         depends_on:
             - db
-#    app-worker:
-#        container_name: "franken_app_worker"
-#        command: php bin/console messenger:consume async -vv
-#        build:
-#            context: ./setup/php-fpm
-#            dockerfile: ./Dockerfile
-#        volumes:
-#            - '.:/var/www/franken/'
-#        depends_on:
-#            - app
+    app-worker:
+        container_name: "franken_app_worker"
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: setup/php-fpm/Dockerfile
+        command: ["php", "bin/console", "messenger:consume", "async"]
+        volumes:
+            - '.:/var/www/franken/'
+        depends_on:
+            - app
     db:
         image: mysql:8.0
         container_name: "wsc_franken_db"
