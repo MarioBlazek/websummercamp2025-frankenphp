@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class PollResultsController extends AbstractController
 {
-    #[Route('/poll/results', name: 'poll_results', methods: ['GET'])]
+    #[Route('/results', name: 'results', methods: ['GET'])]
     public function __invoke(PollRepository $pollRepo): Response
     {
         $polls = $pollRepo->findAll();

@@ -16,5 +16,10 @@ services:
     App\:
         resource: '../src/'
 
+    App\Service\MercureJwtProvider:
+        arguments:
+            $secret: '%env(MERCURE_PUBLISHER_JWT_KEY)%'
+            $topic: 'http://localhost:8080/results'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

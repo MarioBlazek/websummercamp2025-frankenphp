@@ -34,12 +34,13 @@ bash:
 	docker compose exec app bash
 
 db:
+	docker compose exec app php bin/console doctrine:database:drop --force
 	docker compose exec app php bin/console doctrine:database:create --if-not-exists
 	docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
 	docker compose exec app php bin/console app:init-polls
 
 consume:
-	docker compose exec app "php bin/console messenger:consume async"
+	docker compose exec app php bin/console messenger:consume async
 
 logs-consumer:
 	docker logs franken_app_worker
