@@ -1,23 +1,43 @@
-version: '3.9'
-
 services:
-    app:
+    nginx:
+        container_name: "wsc_franken_nginx"
         build:
-            context: .
-        container_name: symfony_app
-        ports:
-            - "8010:8000"
+            context: ./setup/nginx
+            dockerfile: ./Dockerfile
         volumes:
-            - .:/app
+            - '.:/var/www/franken/'
+        ports:
+            - '8080:80'
+        depends_on:
+            - app
+    app:
+        container_name: "franken_app"
+        build:
+            context: ./setup/php-fpm
+            dockerfile: ./Dockerfile
+            args:
+                OS_TYPE: ${DOCKER_HOST_OS:-NonLinux}
+                www_data_uid: ${DOCKER_UID:-1000}
+                www_data_gid: ${DOCKER_GID:-1000}
+        volumes:
+            - '.:/var/www/franken/'
+        ports:
+            - '8081:9000'
         depends_on:
             - db
-        environment:
-            DATABASE_URL: "mysql://app:password@db:3306/app?serverVersion=8.0&charset=utf8mb4"
-        command: php -S 0.0.0.0:8000 -t public
-
+#    app-worker:
+#        container_name: "franken_app_worker"
+#        command: php bin/console messenger:consume async -vv
+#        build:
+#            context: ./setup/php-fpm
+#            dockerfile: ./Dockerfile
+#        volumes:
+#            - '.:/var/www/franken/'
+#        depends_on:
+#            - app
     db:
         image: mysql:8.0
-        container_name: mysql_db
+        container_name: "wsc_franken_db"
         ports:
             - "3307:3306"
         environment:
@@ -28,5 +48,29 @@ services:
         volumes:
             - mysqldata:/var/lib/mysql
 
+    mercure:
+        image: dunglas/mercure
+        container_name: "wsc_franken_mercure"
+        restart: unless-stopped
+        environment:
+          # Uncomment the following line to disable HTTPS,
+          #SERVER_NAME: ':80'
+          MERCURE_PUBLISHER_JWT_KEY: '!SuperCoolSecretKey!'
+          MERCURE_SUBSCRIBER_JWT_KEY: '!SuperCoolSecretKey!'
+          # Set the URL of your Symfony project (without trailing slash!) as value of the cors_origins directive
+          MERCURE_EXTRA_DIRECTIVES: |
+            cors_origins http://127.0.0.1:8000
+        command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
+        healthcheck:
+          test: ["CMD", "curl", "-f", "https://localhost/healthz"]
+          timeout: 5s
+          retries: 5
+          start_period: 60s
+        volumes:
+          - mercure_data:/data
+          - mercure_config:/config
+
 volumes:
     mysqldata:
+    mercure_data:
+    mercure_config:

@@ -15,6 +15,9 @@ up:
 down:
 	docker compose down
 
+enter-app:
+	docker compose exec app /bin/bash
+
 # Run PHP-CS-Fixer
 cs:
 	vendor/bin/php-cs-fixer fix --allow-risky=yes
@@ -36,4 +39,4 @@ db:
 	docker compose exec app php bin/console app:init-polls
 
 consume:
-	php bin/console messenger:consume async
+	docker compose exec app "php bin/console messenger:consume async"
