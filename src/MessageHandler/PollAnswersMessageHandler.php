@@ -7,8 +7,8 @@ use App\Message\PollAnswersMessage;
 use App\Repository\PollOptionRepository;
 use App\Service\MercureJwtProvider;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Mercure\PublisherInterface;
 use Symfony\Component\Mercure\Update;
 
 #[AsMessageHandler]
@@ -17,8 +17,7 @@ class PollAnswersMessageHandler
     public function __construct(
         private EntityManagerInterface $em,
         private PollOptionRepository $optionRepository,
-        private PublisherInterface $publisher,
-        private MercureJwtProvider $jwtProvider,
+        private HubInterface $publisher,
     ) {
     }
 
@@ -61,13 +60,11 @@ class PollAnswersMessageHandler
         }
 
         $update = new Update(
-            'http://localhost:8080/results',
-            json_encode($data),
-            true,
-            null,
-            $this->jwtProvider->getJwt()
+            topics: 'http://localhost:8080/results',
+            data: json_encode($data),
+            private: true,
         );
 
-        $this->publisher->__invoke($update);
+        $this->publisher->publish($update);
     }
 }

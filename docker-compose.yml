@@ -49,11 +49,13 @@ services:
         image: dunglas/mercure
         container_name: "wsc_franken_mercure"
         restart: unless-stopped
+        ports:
+            - "3000:80"  # expose on localhost:3000
         environment:
           # Uncomment the following line to disable HTTPS,
           #SERVER_NAME: ':80'
-          MERCURE_PUBLISHER_JWT_KEY: '!SuperCoolSecretKey!'
-          MERCURE_SUBSCRIBER_JWT_KEY: '!SuperCoolSecretKey!'
+          MERCURE_PUBLISHER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
+          MERCURE_SUBSCRIBER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
           # Set the URL of your Symfony project (without trailing slash!) as value of the cors_origins directive
           MERCURE_EXTRA_DIRECTIVES: |
             cors_origins http://127.0.0.1:8000
