@@ -99,9 +99,7 @@
     const eventSource = new EventSource(url);
 
     eventSource.onmessage = function(event) {
-        console.log(event);
         const data = JSON.parse(event.data);
-        console.log(data);
 
         for (const [pollId, votes] of Object.entries(data)) {
             for (const [optionId, voteCount] of Object.entries(votes)) {

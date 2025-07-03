@@ -2,14 +2,9 @@
 
 namespace App\Controller;
 
-use App\DTO\PollAnswersDTO;
-use App\Service\SubmitPollService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class FrankenPHPController extends AbstractController

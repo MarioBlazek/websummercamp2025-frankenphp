@@ -5,6 +5,7 @@ install:
 	docker compose exec app composer install
 
 build:
+	cp setup/.env.dev.local.template .env.dev.local
 	docker compose build
 
 # Start Docker containers (if you use Docker)

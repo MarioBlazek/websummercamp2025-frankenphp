@@ -1,59 +1,40 @@
 services:
-    franken:
+    nginx:
+        container_name: "wsc_frankenphp_nginx"
+        build:
+            context: ./setup/nginx
+            dockerfile: ./Dockerfile
+        volumes:
+            - '.:/var/www/franken/'
+        ports:
+            - '8010:80'
+        depends_on:
+            - app
+    app:
+        container_name: "wsc_frankenphp_app"
         build:
             context: .
-            dockerfile: setup/frankenphp/Dockerfile
-        ports:
-            - "80:80"
+            dockerfile: setup/php-fpm/Dockerfile
         volumes:
-            - '.:/app'
-        environment:
-            CADDY_ADAPTER: caddyfile
-            CADDY_CONFIG: /etc/caddy/Caddyfile
-            APP_ENV: dev
-            APP_DEBUG: 1
-#    nginx:
-#        container_name: "wsc_franken_nginx"
-#        build:
-#            context: ./setup/nginx
-#            dockerfile: ./Dockerfile
-#        volumes:
-#            - '.:/var/www/franken/'
-#        ports:
-#            - '8080:80'
-#        depends_on:
-#            - app
-#        networks:
-#            - backend
-#    app:
-#        container_name: "franken_app"
-#        build:
-#            context: .
-#            dockerfile: setup/php-fpm/Dockerfile
-#        volumes:
-#            - '.:/var/www/franken/'
-#        ports:
-#            - '8081:9000'
-#        depends_on:
-#            - db
-#        networks:
-#            - backend
-#    app-worker:
-#        container_name: "franken_app_worker"
-#        restart: unless-stopped
-#        build:
-#            context: .
-#            dockerfile: setup/php-fpm/Dockerfile
-#        command: ["php", "bin/console", "messenger:consume", "async"]
-#        volumes:
-#            - '.:/var/www/franken/'
-#        depends_on:
-#            - app
-#        networks:
-#            - backend
+            - '.:/var/www/franken/'
+        ports:
+            - '8081:9000'
+        depends_on:
+            - db
+    worker:
+        container_name: "wsc_frankenphp_worker"
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: setup/php-fpm/Dockerfile
+        command: ["php", "bin/console", "messenger:consume", "async"]
+        volumes:
+            - '.:/var/www/franken/'
+        depends_on:
+            - app
     db:
         image: mysql:8.0
-        container_name: "wsc_franken_db"
+        container_name: "wsc_frankenphp_db"
         ports:
             - "3307:3306"
         environment:
@@ -63,22 +44,19 @@ services:
             MYSQL_ROOT_PASSWORD: root
         volumes:
             - mysqldata:/var/lib/mysql
-
     mercure:
         image: dunglas/mercure
-        container_name: "wsc_franken_mercure"
+        container_name: "wsc_frankenphp_mercure"
         restart: unless-stopped
         ports:
-            - "3000:80"  # expose on localhost:3000
+            - "3000:80"
         environment:
-          # Uncomment the following line to disable HTTPS,
           SERVER_NAME: ':80'
           MERCURE_PUBLISHER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
           MERCURE_SUBSCRIBER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
-          # Set the URL of your Symfony project (without trailing slash!) as value of the cors_origins directive
           MERCURE_EXTRA_DIRECTIVES: |
               anonymous
-              cors_origins http://localhost
+              cors_origins http://localhost http://localhost:8010
               log
         command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
         healthcheck:
@@ -89,9 +67,7 @@ services:
         volumes:
           - mercure_data:/data
           - mercure_config:/config
-
 volumes:
     mysqldata:
     mercure_data:
     mercure_config:
-

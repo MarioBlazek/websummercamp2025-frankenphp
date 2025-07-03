@@ -5,7 +5,6 @@ namespace App\MessageHandler;
 use App\Entity\PollAnswer;
 use App\Message\PollAnswersMessage;
 use App\Repository\PollOptionRepository;
-use App\Service\MercureJwtProvider;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
