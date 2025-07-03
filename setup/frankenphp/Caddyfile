@@ -2,4 +2,10 @@ localhost {
     encode zstd br gzip
 
     php_server
+
+    mercure {
+        anonymous
+        cors_origins http://localhost http://localhost:8010
+        log
+    }
 }

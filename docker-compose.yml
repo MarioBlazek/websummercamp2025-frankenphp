@@ -13,6 +13,12 @@ services:
             CADDY_CONFIG: /etc/caddy/Caddyfile
             CAPP_ENV: dev
             CAPP_DEBUG: 1
+            MERCURE_PUBLISHER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
+            MERCURE_SUBSCRIBER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
+            MERCURE_EXTRA_DIRECTIVES: |
+                anonymous
+                cors_origins http://localhost http://localhost:8010
+                log
         depends_on:
             - db
     worker:
@@ -38,30 +44,5 @@ services:
             MYSQL_ROOT_PASSWORD: root
         volumes:
             - mysqldata:/var/lib/mysql
-    mercure:
-        image: dunglas/mercure
-        container_name: "wsc_frankenphp_mercure"
-        restart: unless-stopped
-        ports:
-            - "3000:80"
-        environment:
-          SERVER_NAME: ':80'
-          MERCURE_PUBLISHER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
-          MERCURE_SUBSCRIBER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
-          MERCURE_EXTRA_DIRECTIVES: |
-              anonymous
-              cors_origins http://localhost http://localhost:8010
-              log
-        command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
-        healthcheck:
-          test: ["CMD", "curl", "-f", "https://localhost/healthz"]
-          timeout: 5s
-          retries: 5
-          start_period: 60s
-        volumes:
-          - mercure_data:/data
-          - mercure_config:/config
 volumes:
     mysqldata:
-    mercure_data:
-    mercure_config:
