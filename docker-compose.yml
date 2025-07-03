@@ -1,37 +1,53 @@
 services:
-    nginx:
-        container_name: "wsc_frankenphp_nginx"
+#    nginx:
+#        container_name: "wsc_frankenphp_nginx"
+#        build:
+#            context: ./setup/nginx
+#            dockerfile: ./Dockerfile
+#        volumes:
+#            - '.:/var/www/franken/'
+#        ports:
+#            - '8010:80'
+#        depends_on:
+#            - app
+    franken:
+        container_name: "wsc_frankenphp_franken"
         build:
-            context: ./setup/nginx
-            dockerfile: ./Dockerfile
+            context: .
+            dockerfile: setup/frankenphp/Dockerfile
         volumes:
             - '.:/var/www/franken/'
         ports:
             - '8010:80'
-        depends_on:
-            - app
-    app:
-        container_name: "wsc_frankenphp_app"
-        build:
-            context: .
-            dockerfile: setup/php-fpm/Dockerfile
-        volumes:
-            - '.:/var/www/franken/'
-        ports:
-            - '8081:9000'
+        environment:
+            CADDY_ADAPTER: caddyfile
+            CADDY_CONFIG: /etc/caddy/Caddyfile
+            CAPP_ENV: dev
+            CAPP_DEBUG: 1
         depends_on:
             - db
-    worker:
-        container_name: "wsc_frankenphp_worker"
-        restart: unless-stopped
-        build:
-            context: .
-            dockerfile: setup/php-fpm/Dockerfile
-        command: ["php", "bin/console", "messenger:consume", "async"]
-        volumes:
-            - '.:/var/www/franken/'
-        depends_on:
-            - app
+#    app:
+#        container_name: "wsc_frankenphp_app"
+#        build:
+#            context: .
+#            dockerfile: setup/php-fpm/Dockerfile
+#        volumes:
+#            - '.:/var/www/franken/'
+#        ports:
+#            - '8081:9000'
+#        depends_on:
+#            - db
+#    worker:
+#        container_name: "wsc_frankenphp_worker"
+#        restart: unless-stopped
+#        build:
+#            context: .
+#            dockerfile: setup/php-fpm/Dockerfile
+#        command: ["php", "bin/console", "messenger:consume", "async"]
+#        volumes:
+#            - '.:/var/www/franken/'
+#        depends_on:
+#            - app
     db:
         image: mysql:8.0
         container_name: "wsc_frankenphp_db"
