@@ -5,6 +5,7 @@ install:
 	docker compose exec app composer install
 
 build:
+	cp setup/.env.dev.local.template .env.dev.local
 	docker compose build
 
 # Start Docker containers (if you use Docker)
@@ -14,6 +15,9 @@ up:
 # Stop Docker containers
 down:
 	docker compose down
+
+enter-app:
+	docker compose exec app /bin/bash
 
 # Run PHP-CS-Fixer
 cs:
@@ -31,9 +35,13 @@ bash:
 	docker compose exec app bash
 
 db:
+	docker compose exec app php bin/console doctrine:database:drop --force
 	docker compose exec app php bin/console doctrine:database:create --if-not-exists
 	docker compose exec app php bin/console doctrine:migrations:migrate --no-interaction
 	docker compose exec app php bin/console app:init-polls
 
 consume:
-	php bin/console messenger:consume async
+	docker compose exec app php bin/console messenger:consume async
+
+logs-consumer:
+	docker logs franken_app_worker

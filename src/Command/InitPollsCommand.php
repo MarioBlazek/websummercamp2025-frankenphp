@@ -30,12 +30,12 @@ class InitPollsCommand extends Command
                 'options' => ['PHP', 'JavaScript', 'Python', 'Go'],
             ],
             [
-                'question' => 'Which editor do you prefer?',
-                'options' => ['VS Code', 'PHPStorm', 'Vim', 'Emacs'],
+                'question' => 'What is the best Symfony conference?',
+                'options' => ['WSC', 'WSC', 'WSC', 'WSC'],
             ],
             [
                 'question' => 'What’s your go-to debugging method?',
-                'options' => ['var_dump()', 'xdebug', 'dump() & die()', 'Staring at the screen'],
+                'options' => ['Staring at the screen', 'var_dump()', 'xdebug', 'dump() & die()'],
             ],
         ];
 

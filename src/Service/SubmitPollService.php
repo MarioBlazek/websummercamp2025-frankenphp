@@ -34,6 +34,7 @@ final class SubmitPollService
             throw new \LogicException('Some selected options are invalid.');
         }
 
+        dump    ($dto);
         $this->bus->dispatch(new PollAnswersMessage($dto));
     }
 }

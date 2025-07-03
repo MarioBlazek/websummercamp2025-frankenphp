@@ -1,23 +1,40 @@
-version: '3.9'
-
 services:
+    nginx:
+        container_name: "wsc_frankenphp_nginx"
+        build:
+            context: ./setup/nginx
+            dockerfile: ./Dockerfile
+        volumes:
+            - '.:/var/www/franken/'
+        ports:
+            - '8010:80'
+        depends_on:
+            - app
     app:
+        container_name: "wsc_frankenphp_app"
         build:
             context: .
-        container_name: symfony_app
-        ports:
-            - "8010:8000"
+            dockerfile: setup/php-fpm/Dockerfile
         volumes:
-            - .:/app
+            - '.:/var/www/franken/'
+        ports:
+            - '8081:9000'
         depends_on:
             - db
-        environment:
-            DATABASE_URL: "mysql://app:password@db:3306/app?serverVersion=8.0&charset=utf8mb4"
-        command: php -S 0.0.0.0:8000 -t public
-
+    worker:
+        container_name: "wsc_frankenphp_worker"
+        restart: unless-stopped
+        build:
+            context: .
+            dockerfile: setup/php-fpm/Dockerfile
+        command: ["php", "bin/console", "messenger:consume", "async"]
+        volumes:
+            - '.:/var/www/franken/'
+        depends_on:
+            - app
     db:
         image: mysql:8.0
-        container_name: mysql_db
+        container_name: "wsc_frankenphp_db"
         ports:
             - "3307:3306"
         environment:
@@ -27,6 +44,30 @@ services:
             MYSQL_ROOT_PASSWORD: root
         volumes:
             - mysqldata:/var/lib/mysql
-
+    mercure:
+        image: dunglas/mercure
+        container_name: "wsc_frankenphp_mercure"
+        restart: unless-stopped
+        ports:
+            - "3000:80"
+        environment:
+          SERVER_NAME: ':80'
+          MERCURE_PUBLISHER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
+          MERCURE_SUBSCRIBER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
+          MERCURE_EXTRA_DIRECTIVES: |
+              anonymous
+              cors_origins http://localhost http://localhost:8010
+              log
+        command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
+        healthcheck:
+          test: ["CMD", "curl", "-f", "https://localhost/healthz"]
+          timeout: 5s
+          retries: 5
+          start_period: 60s
+        volumes:
+          - mercure_data:/data
+          - mercure_config:/config
 volumes:
     mysqldata:
+    mercure_data:
+    mercure_config:

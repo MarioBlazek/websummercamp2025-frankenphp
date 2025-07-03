@@ -77,11 +77,11 @@
 <h1>Poll Results</h1>
 
 {% for poll in polls %}
-    <div class="poll">
+    <div class="poll" data-poll-id="{{ poll.id }}">
         <h3>{{ poll.question }}</h3>
         <ul class="options-list">
             {% for option in poll.options %}
-                <li>
+                <li class="option" data-option-id="{{ option.id }}">
                     {{ option.text }}
                     <span class="votes">{{ option.votes }}</span>
                 </li>
@@ -91,5 +91,28 @@
 {% endfor %}
 
 <a href="{{ path('polls_index') }}" class="back-link">← Back to Polls</a>
+
+<script>
+    const url = new URL('http://localhost:3000/.well-known/mercure');
+    url.searchParams.append('topic', 'poll-results');
+
+    const eventSource = new EventSource(url);
+
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        for (const [pollId, votes] of Object.entries(data)) {
+            for (const [optionId, voteCount] of Object.entries(votes)) {
+                const voteSpan = document.querySelector(
+                    `.poll[data-poll-id="${pollId}"] .option[data-option-id="${optionId}"] .votes`
+                );
+                if (voteSpan) {
+                    voteSpan.textContent = voteCount;
+                }
+            }
+        }
+    };
+</script>
+
 </body>
 </html>
