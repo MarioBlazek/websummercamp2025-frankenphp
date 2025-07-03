@@ -11,13 +11,12 @@ services:
         environment:
             CADDY_ADAPTER: caddyfile
             CADDY_CONFIG: /etc/caddy/Caddyfile
-            CAPP_ENV: dev
-            CAPP_DEBUG: 1
+            APP_ENV: dev
+            APP_DEBUG: 1
             MERCURE_PUBLISHER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
             MERCURE_SUBSCRIBER_JWT_KEY: '8b52f8e451c03e26f4c79249c6d33476e1c905f2a4795f83e43f6f545a3f708a'
             MERCURE_EXTRA_DIRECTIVES: |
                 anonymous
-                cors_origins http://localhost http://localhost:8010
                 log
         depends_on:
             - db
@@ -31,7 +30,7 @@ services:
         volumes:
             - '.:/app'
         depends_on:
-            - app
+            - franken
     db:
         image: mysql:8.0
         container_name: "wsc_frankenphp_db"

@@ -32,7 +32,7 @@ clear:
 	php bin/console cache:clear
 
 bash:
-	docker compose exec app bash
+	docker compose exec franken bash
 
 db:
 	docker compose exec app php bin/console doctrine:database:drop --force
