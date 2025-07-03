@@ -92,16 +92,16 @@
 
 <a href="{{ path('polls_index') }}" class="back-link">← Back to Polls</a>
 
-<script src="https://cdn.jsdelivr.net/npm/@mercure/mercure@0.11.3/dist/mercure.min.js"></script>
-
 <script>
     const url = new URL('http://localhost:3000/.well-known/mercure');
-    url.searchParams.append('topic', 'http://localhost:8080/results');
+    url.searchParams.append('topic', 'poll-results');
 
     const eventSource = new EventSource(url);
 
     eventSource.onmessage = function(event) {
+        console.log(event);
         const data = JSON.parse(event.data);
+        console.log(data);
 
         for (const [pollId, votes] of Object.entries(data)) {
             for (const [optionId, voteCount] of Object.entries(votes)) {

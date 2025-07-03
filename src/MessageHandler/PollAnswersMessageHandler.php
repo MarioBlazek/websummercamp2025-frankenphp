@@ -60,11 +60,15 @@ class PollAnswersMessageHandler
         }
 
         $update = new Update(
-            topics: 'http://localhost:8080/results',
+            topics: 'poll-results',
             data: json_encode($data),
-            private: true,
+            private: false,
         );
 
-        $this->publisher->publish($update);
+        try {
+            $this->publisher->publish($update);
+        } catch (\Throwable $exception) {
+            dd($exception);
+        }
     }
 }
